@@ -48,7 +48,37 @@
     .language-selector .flag {
         font-size: 1.2em;
         margin-left: 0.5rem;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1;
     }
+
+    .language-dropdown {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem !important;
+        white-space: nowrap;
+    }
+
+    .language-dropdown .flag {
+        margin-right: 0.5rem;
+        margin-left: 0;
+    }
+
+    /* إصلاح مشكلة العلم في الهاتف */
+    .navbar-nav .language-selector {
+        text-align: center;
+        border-bottom: none !important;
+    }
+
+    .navbar-nav .language-selector .nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+    }
+}
 
     /* إصلاح مشكلة القائمة المنسدلة */
     .navbar-collapse {
@@ -675,4 +705,233 @@
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
     }
+}
+
+/* ===================================
+   تحسينات خاصة باللغة الكردية
+   =================================== */
+
+/* خطوط مخصصة للغة الكردية */
+html[lang="ku"] {
+    font-family: 'Noto Sans Arabic', 'Amiri', 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html[lang="ku"] body {
+    font-family: 'Noto Sans Arabic', 'Amiri', 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+}
+
+/* تحسين عرض النصوص الكردية */
+html[lang="ku"] .card-title,
+html[lang="ku"] .navbar-brand,
+html[lang="ku"] .nav-link,
+html[lang="ku"] h1, html[lang="ku"] h2, html[lang="ku"] h3, 
+html[lang="ku"] h4, html[lang="ku"] h5, html[lang="ku"] h6 {
+    font-family: 'Amiri', 'Noto Sans Arabic', 'Cairo', serif;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* تحسين النصوص العادية */
+html[lang="ku"] p,
+html[lang="ku"] .card-text,
+html[lang="ku"] .form-control,
+html[lang="ku"] .btn {
+    font-family: 'Noto Sans Arabic', 'Cairo', sans-serif;
+    line-height: 1.6;
+}
+
+/* تحسين للهاتف - اللغة الكردية */
+@media (max-width: 768px) {
+    html[lang="ku"] {
+        font-size: 16px; /* منع التكبير التلقائي في iOS */
+    }
+    
+    html[lang="ku"] .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    html[lang="ku"] .nav-link {
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    html[lang="ku"] .card-title {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+    
+    html[lang="ku"] .card-text {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    html[lang="ku"] .btn {
+        font-size: 0.9rem;
+        padding: 0.6rem 1.2rem;
+    }
+    
+    html[lang="ku"] .form-control {
+        font-size: 16px; /* منع التكبير في iOS */
+        padding: 0.75rem;
+    }
+    
+    /* تحسين القوائم المنسدلة للكردية */
+    html[lang="ku"] .dropdown-item {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        text-align: right;
+    }
+    
+    /* تحسين الإشعارات للكردية */
+    html[lang="ku"] .notification-item {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        text-align: right;
+    }
+    
+    /* تحسين النماذج للكردية */
+    html[lang="ku"] .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    html[lang="ku"] .form-text {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+}
+
+/* تحسين الاتجاه للكردية (RTL) */
+html[lang="ku"][dir="rtl"] .dropdown-menu {
+    text-align: right;
+}
+
+html[lang="ku"][dir="rtl"] .navbar-nav {
+    text-align: right;
+}
+
+html[lang="ku"][dir="rtl"] .card-body {
+    text-align: right;
+}
+
+/* تحسين الأرقام والتواريخ للكردية */
+html[lang="ku"] .badge,
+html[lang="ku"] .alert,
+html[lang="ku"] .pagination {
+    font-family: 'Noto Sans Arabic', sans-serif;
+}
+
+/* تحسين الجداول للكردية */
+html[lang="ku"] .table {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    font-size: 0.9rem;
+}
+
+html[lang="ku"] .table th {
+    font-weight: 600;
+    text-align: right;
+}
+
+html[lang="ku"] .table td {
+    text-align: right;
+    vertical-align: middle;
+}
+
+/* تحسين المودال للكردية */
+html[lang="ku"] .modal-title {
+    font-family: 'Amiri', 'Noto Sans Arabic', serif;
+    font-weight: 600;
+}
+
+html[lang="ku"] .modal-body {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    line-height: 1.6;
+    text-align: right;
+}
+
+/* تحسين التنبيهات للكردية */
+html[lang="ku"] .alert {
+    text-align: right;
+    font-family: 'Noto Sans Arabic', sans-serif;
+}
+
+/* تحسين التحميل والرسائل للكردية */
+html[lang="ku"] .loading-text,
+html[lang="ku"] .empty-state {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    text-align: center;
+}
+
+/* تحسين الأزرار للكردية */
+html[lang="ku"] .btn {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    font-weight: 500;
+}
+
+/* تحسين البحث للكردية */
+html[lang="ku"] .search-input::placeholder {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    opacity: 0.7;
+}
+
+/* تحسين التنقل للكردية */
+html[lang="ku"] .breadcrumb {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    text-align: right;
+}
+
+html[lang="ku"] .pagination {
+    direction: ltr; /* الأرقام تبقى من اليسار لليمين */
+}
+
+/* تحسين الفلاتر للكردية */
+html[lang="ku"] .filter-container {
+    text-align: right;
+}
+
+html[lang="ku"] .filter-title {
+    font-family: 'Amiri', 'Noto Sans Arabic', serif;
+    font-weight: 600;
+}
+
+/* تحسين الكروت للكردية */
+html[lang="ku"] .card {
+    text-align: right;
+}
+
+html[lang="ku"] .card-header {
+    font-family: 'Amiri', 'Noto Sans Arabic', serif;
+    font-weight: 600;
+}
+
+/* تحسين القوائم للكردية */
+html[lang="ku"] .list-group-item {
+    text-align: right;
+    font-family: 'Noto Sans Arabic', sans-serif;
+}
+
+/* تحسين الشارات للكردية */
+html[lang="ku"] .badge {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    font-size: 0.8em;
+}
+
+/* تحسين التبويبات للكردية */
+html[lang="ku"] .nav-tabs .nav-link {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    text-align: center;
+}
+
+/* تحسين الأكورديون للكردية */
+html[lang="ku"] .accordion-button {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    text-align: right;
+}
+
+html[lang="ku"] .accordion-body {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    text-align: right;
+    line-height: 1.6;
 }

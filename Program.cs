@@ -164,6 +164,15 @@ builder.Services.AddScoped<IFileService, FileService>();
 // 🔔 Notification Service
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
+// Default Image Service
+builder.Services.AddScoped<IDefaultImageService, DefaultImageService>();
+
+// Request Workflow Service
+builder.Services.AddScoped<IRequestWorkflowService, RequestWorkflowService>();
+
+// Store Workflow Service
+builder.Services.AddScoped<IStoreWorkflowService, StoreWorkflowService>();
+
 // Language Service
 builder.Services.AddScoped<ILanguageService, LanguageService>();
 

@@ -16,17 +16,20 @@ namespace ReverseMarket.Areas.Admin.Controllers
         private readonly ILogger<RequestsController> _logger;
         private readonly WhatsAppService _whatsAppService;
         private readonly INotificationService _notificationService;
+        private readonly IRequestWorkflowService _requestWorkflowService;
 
         public RequestsController(
             ApplicationDbContext context,
             ILogger<RequestsController> logger,
             WhatsAppService whatsAppService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IRequestWorkflowService requestWorkflowService)
         {
             _dbContext = context;
             _logger = logger;
             _whatsAppService = whatsAppService;
             _notificationService = notificationService;
+            _requestWorkflowService = requestWorkflowService;
         }
 
         public async Task<IActionResult> Index(RequestStatus? status = null, int page = 1)
@@ -81,6 +84,155 @@ namespace ReverseMarket.Areas.Admin.Controllers
             return View(request);
         }
 
+        /// <summary>
+        /// رفض طلب مع سبب الرفض
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectRequest(int id, string rejectionReason)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(rejectionReason))
+                {
+                    TempData["ErrorMessage"] = "سبب الرفض مطلوب";
+                    return RedirectToAction("Details", new { id });
+                }
+
+                var request = await _dbContext.Requests
+                    .Include(r => r.User)
+                    .Include(r => r.Category)
+                    .Include(r => r.SubCategory1)
+                    .Include(r => r.SubCategory2)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
+                if (request == null)
+                {
+                    TempData["ErrorMessage"] = "الطلب غير موجود";
+                    return RedirectToAction("Index");
+                }
+
+                // تحديث حالة الطلب
+                request.Status = RequestStatus.Rejected;
+                request.RejectionReason = rejectionReason;
+                request.AdminNotes = rejectionReason; // للتوافق مع الكود القديم
+
+                await _dbContext.SaveChangesAsync();
+
+                // إرسال إشعار بالرفض مع السبب
+                await _requestWorkflowService.NotifyRequestRejectionAsync(request, rejectionReason);
+
+                TempData["SuccessMessage"] = "تم رفض الطلب وإرسال إشعار للمستخدم";
+                return RedirectToAction("Details", new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في رفض الطلب: {RequestId}", id);
+                TempData["ErrorMessage"] = "حدث خطأ أثناء رفض الطلب";
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
+        /// <summary>
+        /// الموافقة على تعديل طلب
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveModification(int id)
+        {
+            try
+            {
+                var request = await _dbContext.Requests
+                    .Include(r => r.User)
+                    .Include(r => r.Category)
+                    .Include(r => r.SubCategory1)
+                    .Include(r => r.SubCategory2)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
+                if (request == null)
+                {
+                    TempData["ErrorMessage"] = "الطلب غير موجود";
+                    return RedirectToAction("Index");
+                }
+
+                if (request.Status != RequestStatus.ModificationPending)
+                {
+                    TempData["ErrorMessage"] = "هذا الطلب ليس في انتظار موافقة التعديل";
+                    return RedirectToAction("Details", new { id });
+                }
+
+                // تحديث حالة الطلب
+                request.Status = RequestStatus.Approved;
+                request.ApprovedAt = DateTime.Now;
+
+                await _dbContext.SaveChangesAsync();
+
+                // إرسال إشعار بالموافقة على التعديل والمتاجر المتخصصة
+                await _requestWorkflowService.NotifyRequestModificationApprovalAsync(request);
+                await _requestWorkflowService.NotifyRelevantStoresAsync(request);
+
+                TempData["SuccessMessage"] = "تم اعتماد تعديل الطلب وإرسال إشعارات للمتاجر المتخصصة";
+                return RedirectToAction("Details", new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في الموافقة على تعديل الطلب: {RequestId}", id);
+                TempData["ErrorMessage"] = "حدث خطأ أثناء الموافقة على التعديل";
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
+        /// <summary>
+        /// رفض تعديل طلب
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectModification(int id, string rejectionReason)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(rejectionReason))
+                {
+                    TempData["ErrorMessage"] = "سبب رفض التعديل مطلوب";
+                    return RedirectToAction("Details", new { id });
+                }
+
+                var request = await _dbContext.Requests
+                    .Include(r => r.User)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
+                if (request == null)
+                {
+                    TempData["ErrorMessage"] = "الطلب غير موجود";
+                    return RedirectToAction("Index");
+                }
+
+                if (request.Status != RequestStatus.ModificationPending)
+                {
+                    TempData["ErrorMessage"] = "هذا الطلب ليس في انتظار موافقة التعديل";
+                    return RedirectToAction("Details", new { id });
+                }
+
+                // إعادة الطلب لحالته السابقة (معلق أو مرفوض)
+                request.Status = RequestStatus.Pending;
+                request.RejectionReason = rejectionReason;
+
+                await _dbContext.SaveChangesAsync();
+
+                // إرسال إشعار برفض التعديل
+                await SendModificationRejectionNotificationAsync(request, rejectionReason);
+
+                TempData["SuccessMessage"] = "تم رفض تعديل الطلب وإرسال إشعار للمستخدم";
+                return RedirectToAction("Details", new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في رفض تعديل الطلب: {RequestId}", id);
+                TempData["ErrorMessage"] = "حدث خطأ أثناء رفض التعديل";
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, int status, string? adminNotes = null)
@@ -117,11 +269,8 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     // حفظ التغييرات أولاً
                     await _dbContext.SaveChangesAsync();
 
-                    // ✅ إرسال إشعار للمستخدم بالموافقة
-                    await SendApprovalNotificationAsync(request);
-
-                    // ✅ إرسال إشعار للمتاجر المتخصصة بنفس الفئة الفرعية الثانية
-                    await SendStoreNotificationsAsync(request);
+                    // ✅ إرسال إشعار للمستخدم والمتاجر المتخصصة
+                    await _requestWorkflowService.NotifyRequestApprovalAsync(request);
                 }
                 else if (requestStatus == RequestStatus.Rejected)
                 {
@@ -751,6 +900,121 @@ namespace ReverseMarket.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "خطأ في إرسال إشعار الرفض");
+            }
+        }
+
+        /// <summary>
+        /// إرسال إشعار رفض مع سبب الرفض
+        /// </summary>
+        private async Task SendRejectionNotificationWithReasonAsync(Request request, string rejectionReason)
+        {
+            try
+            {
+                var title = "تحديث حول طلبك";
+                var message = $"مرحباً {request.User?.FirstName}!\n\n" +
+                             $"نأسف لإبلاغك بأن طلبك: \"{request.Title}\" لم تتم الموافقة عليه.\n\n" +
+                             $"سبب الرفض: {rejectionReason}\n\n" +
+                             "يمكنك تعديل طلبك وإعادة إرساله أو إضافة طلب جديد في أي وقت.\n\n" +
+                             "شكراً لتفهمك - السوق العكسي 🛒";
+
+                var notification = await _notificationService.CreateNotificationAsync(
+                    title: title,
+                    message: message,
+                    type: NotificationType.RequestRejected,
+                    userId: request.UserId,
+                    requestId: request.Id,
+                    isFromAdmin: true,
+                    adminId: User.Identity?.Name
+                );
+
+                await _notificationService.SendNotificationAsync(notification,
+                    sendEmail: true,
+                    sendWhatsApp: true,
+                    sendInApp: true);
+
+                _logger.LogInformation("✅ تم إرسال إشعار الرفض مع السبب للمستخدم {UserId} للطلب #{RequestId}",
+                    request.UserId, request.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ خطأ في إرسال إشعار الرفض مع السبب للطلب #{RequestId}", request.Id);
+            }
+        }
+
+        /// <summary>
+        /// إرسال إشعار الموافقة على التعديل
+        /// </summary>
+        private async Task SendModificationApprovalNotificationAsync(Request request)
+        {
+            try
+            {
+                var title = "تم اعتماد تعديل طلبك";
+                var message = $"مرحباً {request.User?.FirstName}!\n\n" +
+                             $"يسعدنا إبلاغك بأنه تم اعتماد التعديلات على طلبك: \"{request.Title}\"\n\n" +
+                             $"سيتم الآن عرض طلبك المحدث للمتاجر المتخصصة.\n\n" +
+                             "شكراً لاستخدامك السوق العكسي! 🛒";
+
+                var notification = await _notificationService.CreateNotificationAsync(
+                    title: title,
+                    message: message,
+                    type: NotificationType.RequestModificationApproved,
+                    userId: request.UserId,
+                    requestId: request.Id,
+                    link: $"/Requests/Details/{request.Id}",
+                    isFromAdmin: true,
+                    adminId: User.Identity?.Name
+                );
+
+                await _notificationService.SendNotificationAsync(notification,
+                    sendEmail: true,
+                    sendWhatsApp: true,
+                    sendInApp: true);
+
+                _logger.LogInformation("✅ تم إرسال إشعار الموافقة على التعديل للمستخدم {UserId} للطلب #{RequestId}",
+                    request.UserId, request.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ خطأ في إرسال إشعار الموافقة على التعديل للطلب #{RequestId}", request.Id);
+            }
+        }
+
+        /// <summary>
+        /// إرسال إشعار رفض التعديل
+        /// </summary>
+        private async Task SendModificationRejectionNotificationAsync(Request request, string rejectionReason)
+        {
+            try
+            {
+                var title = "تحديث حول تعديل طلبك";
+                var message = $"مرحباً {request.User?.FirstName}!\n\n" +
+                             $"نأسف لإبلاغك بأن التعديلات على طلبك: \"{request.Title}\" لم تتم الموافقة عليها.\n\n" +
+                             $"سبب الرفض: {rejectionReason}\n\n" +
+                             "يمكنك إجراء تعديلات أخرى وإعادة الإرسال.\n\n" +
+                             "شكراً لتفهمك - السوق العكسي 🛒";
+
+                var notification = await _notificationService.CreateNotificationAsync(
+                    title: title,
+                    message: message,
+                    type: NotificationType.RequestModificationRejected,
+                    userId: request.UserId,
+                    requestId: request.Id,
+                    link: $"/Requests/Edit/{request.Id}",
+                    isFromAdmin: true,
+                    adminId: User.Identity?.Name
+                );
+
+                await _notificationService.SendNotificationAsync(notification,
+                    sendEmail: true,
+                    sendWhatsApp: true,
+                    sendInApp: true);
+
+                _logger.LogInformation("✅ تم إرسال إشعار رفض التعديل للمستخدم {UserId} للطلب #{RequestId}",
+                    request.UserId, request.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ خطأ في إرسال إشعار رفض التعديل للطلب #{RequestId}", request.Id);
             }
         }
 
