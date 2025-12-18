@@ -158,6 +158,30 @@ namespace ReverseMarket.Models.Identity
         public string? PreferredContactTime { get; set; }
 
         // ═══════════════════════════════════════════════════════════════════════════════
+        // ✅ تفضيلات الإشعارات (جديد)
+        // ═══════════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// السماح بإرسال إشعارات عبر الواتساب
+        /// </summary>
+        public bool AllowWhatsAppNotifications { get; set; } = true;
+
+        /// <summary>
+        /// السماح بإرسال إشعارات عبر البريد الإلكتروني
+        /// </summary>
+        public bool AllowEmailNotifications { get; set; } = true;
+
+        /// <summary>
+        /// السماح بإرسال الإشعارات الداخلية في الموقع
+        /// </summary>
+        public bool AllowInAppNotifications { get; set; } = true;
+
+        /// <summary>
+        /// السماح بإرسال إشعارات عبر الرسائل النصية SMS
+        /// </summary>
+        public bool AllowSMSNotifications { get; set; } = false;
+
+        // ═══════════════════════════════════════════════════════════════════════════════
         // خصائص محسوبة (لا تُحفظ في قاعدة البيانات)
         // ═══════════════════════════════════════════════════════════════════════════════
 

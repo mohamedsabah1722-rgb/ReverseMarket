@@ -89,3 +89,173 @@
         </li>
     </ul>
 </li>
+
+<style>
+/* Language Selector Mobile Fixes */
+.language-selector {
+    position: relative;
+}
+
+.language-dropdown {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.language-dropdown:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    color: inherit;
+}
+
+.current-language-flag {
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    display: inline-block;
+    line-height: 1;
+}
+
+.current-language-name {
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .language-selector {
+        margin-left: 0.5rem;
+    }
+    
+    .language-dropdown {
+        padding: 0.4rem 0.6rem;
+        min-width: 50px;
+        justify-content: center;
+    }
+    
+    .current-language-flag {
+        font-size: 1.1rem;
+        margin-left: 0.25rem;
+    }
+    
+    .dropdown-menu {
+        min-width: 150px;
+        right: 0;
+        left: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .language-dropdown {
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .current-language-flag {
+        font-size: 1rem;
+        margin-left: 0.2rem;
+    }
+}
+
+/* Dropdown Menu Styling */
+.dropdown-menu {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: right;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.language-option:hover:not(:disabled) {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.language-option.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.language-option .flag {
+    font-size: 1.1rem;
+    margin-left: 0.75rem;
+    display: inline-block;
+    line-height: 1;
+}
+
+.language-option .lang-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.language-form {
+    margin: 0;
+}
+
+/* Kurdish Text Support */
+.lang-name {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Noto Sans Arabic', 'Arial Unicode MS';
+    direction: ltr;
+    text-align: right;
+}
+
+/* Kurdish language specific styling */
+.language-option .lang-name:lang(ku) {
+    font-family: 'Noto Sans Arabic', 'Arial Unicode MS', 'Segoe UI', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Fix for Kurdish text rendering on mobile */
+@media (max-width: 768px) {
+    .language-option .lang-name:lang(ku) {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+}
+
+/* Ensure proper flag display on all devices */
+.flag, .current-language-flag {
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .language-dropdown:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .dropdown-menu {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .language-option:hover:not(:disabled) {
+        background-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .language-option.active {
+        background-color: #2b6cb0;
+        color: #bee3f8;
+    }
+}
+</style>

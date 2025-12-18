@@ -151,23 +151,23 @@ namespace ReverseMarket.Services
                     await _context.SaveChangesAsync();
                 }
 
-                // إرسال الإشعارات عبر القنوات المختلفة
+                // إرسال الإشعارات عبر القنوات المختلفة مع مراعاة تفضيلات المستخدم
                 foreach (var user in targetUsers)
                 {
-                    // 1. إشعار داخل التطبيق (SignalR)
-                    if (sendInApp)
+                    // 1. إشعار داخل التطبيق (SignalR) - مع مراعاة تفضيلات المستخدم
+                    if (sendInApp && user.AllowInAppNotifications)
                     {
                         await SendInAppNotificationAsync(user.UserName!, notification);
                     }
 
-                    // 2. إرسال عبر الإيميل
-                    if (sendEmail && !string.IsNullOrEmpty(user.Email))
+                    // 2. إرسال عبر الإيميل - مع مراعاة تفضيلات المستخدم
+                    if (sendEmail && !string.IsNullOrEmpty(user.Email) && user.AllowEmailNotifications)
                     {
                         await SendEmailNotificationAsync(user, notification);
                     }
 
-                    // 3. إرسال عبر الواتساب
-                    if (sendWhatsApp && !string.IsNullOrEmpty(user.PhoneNumber))
+                    // 3. إرسال عبر الواتساب - مع مراعاة تفضيلات المستخدم
+                    if (sendWhatsApp && !string.IsNullOrEmpty(user.PhoneNumber) && user.AllowWhatsAppNotifications)
                     {
                         await SendWhatsAppNotificationAsync(user, notification);
                     }

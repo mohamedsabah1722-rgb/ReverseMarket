@@ -20,6 +20,8 @@ namespace ReverseMarket.Controllers
         private readonly ILogger<RequestsController> _logger;
         private readonly WhatsAppService _customWhatsAppService;
         private readonly INotificationService _notificationService;
+        private readonly IDefaultImageService _defaultImageService;
+        private readonly IRequestWorkflowService _requestWorkflowService;
 
         public RequestsController(
             ApplicationDbContext context,
@@ -28,7 +30,9 @@ namespace ReverseMarket.Controllers
             UserManager<ApplicationUser> userManager,
             ILogger<RequestsController> logger,
             WhatsAppService customWhatsAppService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IDefaultImageService defaultImageService,
+            IRequestWorkflowService requestWorkflowService)
             : base(context)
         {
             _webHostEnvironment = webHostEnvironment;
@@ -37,6 +41,8 @@ namespace ReverseMarket.Controllers
             _logger = logger;
             _customWhatsAppService = customWhatsAppService;
             _notificationService = notificationService;
+            _defaultImageService = defaultImageService;
+            _requestWorkflowService = requestWorkflowService;
         }
 
         public async Task<IActionResult> Index(string search, int? categoryId, int? subCategory1Id, int? subCategory2Id, int page = 1)
@@ -354,8 +360,11 @@ namespace ReverseMarket.Controllers
                         await SaveRequestImagesAsync(request.Id, model.Images);
                     }
 
+                    // ✅ إضافة صورة افتراضية إذا لم يتم رفع أي صورة
+                    await _defaultImageService.AddDefaultImageIfNeededAsync(request.Id);
+
                     // إرسال إشعار للإدارة عن الطلب الجديد
-                    await NotifyAdminAboutNewRequestAsync(request);
+                    await _requestWorkflowService.NotifyAdminAboutNewRequestAsync(request);
 
                     TempData["SuccessMessage"] = "تم إرسال طلبك بنجاح! سيتم مراجعته والموافقة عليه في أقرب وقت.";
                     return RedirectToAction("Index");

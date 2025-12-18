@@ -16,17 +16,20 @@ namespace ReverseMarket.Areas.Admin.Controllers
         private readonly ILogger<RequestsController> _logger;
         private readonly WhatsAppService _whatsAppService;
         private readonly INotificationService _notificationService;
+        private readonly IRequestWorkflowService _requestWorkflowService;
 
         public RequestsController(
             ApplicationDbContext context,
             ILogger<RequestsController> logger,
             WhatsAppService whatsAppService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IRequestWorkflowService requestWorkflowService)
         {
             _dbContext = context;
             _logger = logger;
             _whatsAppService = whatsAppService;
             _notificationService = notificationService;
+            _requestWorkflowService = requestWorkflowService;
         }
 
         public async Task<IActionResult> Index(RequestStatus? status = null, int page = 1)
@@ -117,7 +120,7 @@ namespace ReverseMarket.Areas.Admin.Controllers
                 await _dbContext.SaveChangesAsync();
 
                 // إرسال إشعار بالرفض مع السبب
-                await SendRejectionNotificationWithReasonAsync(request, rejectionReason);
+                await _requestWorkflowService.NotifyRequestRejectionAsync(request, rejectionReason);
 
                 TempData["SuccessMessage"] = "تم رفض الطلب وإرسال إشعار للمستخدم";
                 return RedirectToAction("Details", new { id });
@@ -164,11 +167,9 @@ namespace ReverseMarket.Areas.Admin.Controllers
 
                 await _dbContext.SaveChangesAsync();
 
-                // إرسال إشعار بالموافقة على التعديل
-                await SendModificationApprovalNotificationAsync(request);
-
-                // إرسال إشعار للمتاجر المتخصصة
-                await SendStoreNotificationsAsync(request);
+                // إرسال إشعار بالموافقة على التعديل والمتاجر المتخصصة
+                await _requestWorkflowService.NotifyRequestModificationApprovalAsync(request);
+                await _requestWorkflowService.NotifyRelevantStoresAsync(request);
 
                 TempData["SuccessMessage"] = "تم اعتماد تعديل الطلب وإرسال إشعارات للمتاجر المتخصصة";
                 return RedirectToAction("Details", new { id });
@@ -268,11 +269,8 @@ namespace ReverseMarket.Areas.Admin.Controllers
                     // حفظ التغييرات أولاً
                     await _dbContext.SaveChangesAsync();
 
-                    // ✅ إرسال إشعار للمستخدم بالموافقة
-                    await SendApprovalNotificationAsync(request);
-
-                    // ✅ إرسال إشعار للمتاجر المتخصصة بنفس الفئة الفرعية الثانية
-                    await SendStoreNotificationsAsync(request);
+                    // ✅ إرسال إشعار للمستخدم والمتاجر المتخصصة
+                    await _requestWorkflowService.NotifyRequestApprovalAsync(request);
                 }
                 else if (requestStatus == RequestStatus.Rejected)
                 {
