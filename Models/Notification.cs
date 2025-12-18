@@ -49,15 +49,28 @@ namespace ReverseMarket.Models
 
     public enum NotificationType
     {
+        // إشعارات الطلبات
         RequestApproved,        // طلب تم اعتماده
         RequestRejected,        // طلب تم رفضه
+        RequestModified,        // طلب تم تعديله (للإدارة)
+        RequestModificationApproved,  // تعديل الطلب تم اعتماده
+        RequestModificationRejected,  // تعديل الطلب تم رفضه
+        RequestDeleted,         // طلب تم حذفه
+        NewRequestForAdmin,     // طلب جديد للإدارة
         NewRequestForStore,     // طلب جديد للمتجر
-        AdminAnnouncement,      // إعلان من الإدارة
-        SystemNotification,     // إشعار نظام
+        
+        // إشعارات المتاجر
         StoreApproved,          // متجر تم اعتماده
         StoreRejected,          // متجر تم رفضه
+        NewStoreForAdmin,       // متجر جديد للإدارة
+        
+        // إشعارات الروابط
         UrlChangeApproved,      // تغيير الروابط تم اعتماده
         UrlChangeRejected,      // تغيير الروابط تم رفضه
+        
+        // إشعارات عامة
+        AdminAnnouncement,      // إعلان من الإدارة
+        SystemNotification,     // إشعار نظام
         General                 // إشعار عام
     }
 }

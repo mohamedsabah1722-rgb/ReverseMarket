@@ -28,6 +28,15 @@ const notificationManager = {
         setInterval(() => {
             this.updateBadgeCount();
         }, 60000);
+
+        // إضافة event listener لفتح القائمة المنسدلة
+        const dropdownToggle = document.getElementById('notificationDropdown');
+        if (dropdownToggle) {
+            dropdownToggle.addEventListener('click', () => {
+                this.loadNotifications();
+                this.updateBadgeCount();
+            });
+        }
     },
 
     connectSignalR: function () {
@@ -231,14 +240,43 @@ const notificationManager = {
                 const count = data.count || 0;
                 if (this.badge) {
                     if (count > 0) {
+                        // تحديث النص
                         this.badge.textContent = count > 99 ? '99+' : count;
+                        
+                        // إضافة كلاس للأرقام الكبيرة
+                        if (count > 9) {
+                            this.badge.classList.add('large-count');
+                        } else {
+                            this.badge.classList.remove('large-count');
+                        }
+                        
+                        // إظهار النقطة الحمراء
                         this.badge.style.display = 'flex';
+                        
+                        // إضافة تأثير نبضة للإشعارات الجديدة
+                        this.badge.style.animation = 'pulse-badge 2s infinite';
+                        this.badge.classList.add('new-notification');
+                        
+                        // تحديث عنوان الصفحة
+                        this.updatePageTitle(count);
                     } else {
                         this.badge.style.display = 'none';
+                        this.badge.classList.remove('large-count', 'new-notification');
+                        this.badge.style.animation = '';
+                        this.updatePageTitle(0);
                     }
                 }
             })
             .catch(err => console.error('خطأ في تحديث العداد:', err));
+    },
+
+    updatePageTitle: function(count) {
+        const originalTitle = document.title.replace(/^\(\d+\)\s*/, '');
+        if (count > 0) {
+            document.title = `(${count}) ${originalTitle}`;
+        } else {
+            document.title = originalTitle;
+        }
     },
 
     markAsRead: function (notificationId) {
@@ -276,14 +314,27 @@ const notificationManager = {
 
     getNotificationIcon: function (type) {
         const icons = {
+            // إشعارات الطلبات
             'RequestApproved': 'fa-check-circle text-success',
             'RequestRejected': 'fa-times-circle text-danger',
+            'RequestModified': 'fa-edit text-warning',
+            'RequestModificationApproved': 'fa-check-circle text-success',
+            'RequestModificationRejected': 'fa-times-circle text-danger',
+            'RequestDeleted': 'fa-trash text-danger',
+            'NewRequestForAdmin': 'fa-clipboard-list text-primary',
             'NewRequestForStore': 'fa-shopping-cart text-primary',
-            'AdminAnnouncement': 'fa-bullhorn text-warning',
+            
+            // إشعارات المتاجر
             'StoreApproved': 'fa-store text-success',
             'StoreRejected': 'fa-store-slash text-danger',
+            'NewStoreForAdmin': 'fa-store-alt text-primary',
+            
+            // إشعارات الروابط
             'UrlChangeApproved': 'fa-link text-success',
             'UrlChangeRejected': 'fa-unlink text-danger',
+            
+            // إشعارات عامة
+            'AdminAnnouncement': 'fa-bullhorn text-warning',
             'SystemNotification': 'fa-cog text-secondary'
         };
         return icons[type] || 'fa-bell text-info';

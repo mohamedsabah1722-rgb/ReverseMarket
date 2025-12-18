@@ -338,14 +338,27 @@ namespace ReverseMarket.Services
         {
             return type switch
             {
+                // إشعارات الطلبات
                 NotificationType.RequestApproved => "✅ تم اعتماد الطلب",
                 NotificationType.RequestRejected => "❌ تم رفض الطلب",
+                NotificationType.RequestModified => "📝 طلب تم تعديله",
+                NotificationType.RequestModificationApproved => "✅ تم اعتماد تعديل الطلب",
+                NotificationType.RequestModificationRejected => "❌ تم رفض تعديل الطلب",
+                NotificationType.RequestDeleted => "🗑️ تم حذف الطلب",
+                NotificationType.NewRequestForAdmin => "📋 طلب جديد للمراجعة",
                 NotificationType.NewRequestForStore => "🛒 طلب جديد متاح",
-                NotificationType.AdminAnnouncement => "📢 إعلان من الإدارة",
+                
+                // إشعارات المتاجر
                 NotificationType.StoreApproved => "✅ تم اعتماد المتجر",
                 NotificationType.StoreRejected => "❌ تم رفض المتجر",
+                NotificationType.NewStoreForAdmin => "🏪 متجر جديد للمراجعة",
+                
+                // إشعارات الروابط
                 NotificationType.UrlChangeApproved => "✅ تم اعتماد الروابط",
                 NotificationType.UrlChangeRejected => "❌ تم رفض الروابط",
+                
+                // إشعارات عامة
+                NotificationType.AdminAnnouncement => "📢 إعلان من الإدارة",
                 NotificationType.SystemNotification => "⚙️ إشعار النظام",
                 _ => "📬 إشعار عام"
             };
@@ -355,14 +368,27 @@ namespace ReverseMarket.Services
         {
             return type switch
             {
+                // إشعارات الطلبات
                 NotificationType.RequestApproved => "✅",
                 NotificationType.RequestRejected => "❌",
+                NotificationType.RequestModified => "📝",
+                NotificationType.RequestModificationApproved => "✅",
+                NotificationType.RequestModificationRejected => "❌",
+                NotificationType.RequestDeleted => "🗑️",
+                NotificationType.NewRequestForAdmin => "📋",
                 NotificationType.NewRequestForStore => "🛒",
-                NotificationType.AdminAnnouncement => "📢",
+                
+                // إشعارات المتاجر
                 NotificationType.StoreApproved => "✅",
                 NotificationType.StoreRejected => "❌",
+                NotificationType.NewStoreForAdmin => "🏪",
+                
+                // إشعارات الروابط
                 NotificationType.UrlChangeApproved => "✅",
                 NotificationType.UrlChangeRejected => "❌",
+                
+                // إشعارات عامة
+                NotificationType.AdminAnnouncement => "📢",
                 NotificationType.SystemNotification => "⚙️",
                 _ => "🔔"
             };

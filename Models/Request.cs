@@ -40,6 +40,26 @@ namespace ReverseMarket.Models
 
         public string? AdminNotes { get; set; }
 
+        /// <summary>
+        /// سبب رفض الطلب (إلزامي عند الرفض)
+        /// </summary>
+        public string? RejectionReason { get; set; }
+
+        /// <summary>
+        /// تاريخ آخر تعديل للطلب
+        /// </summary>
+        public DateTime? LastModifiedAt { get; set; }
+
+        /// <summary>
+        /// هل الطلب تم تعديله من قبل المستخدم؟
+        /// </summary>
+        public bool IsModified { get; set; } = false;
+
+        /// <summary>
+        /// عدد مرات التعديل
+        /// </summary>
+        public int ModificationCount { get; set; } = 0;
+
         // Navigation properties
         public virtual ApplicationUser User { get; set; } = null!;
         public virtual Category Category { get; set; } = null!;
@@ -69,6 +89,7 @@ namespace ReverseMarket.Models
         Pending = 1,
         Approved = 2,
         Rejected = 3,
-        Postponed = 4
+        Postponed = 4,
+        ModificationPending = 5  // تعديل في انتظار الموافقة
     }
 }
